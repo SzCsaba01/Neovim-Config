@@ -28,6 +28,7 @@ return {
                     "jdtls",
                 }, 
             },
+            automatic_installation = true,
             ensure_installed = {
                 "angularls",
                 "omnisharp",
@@ -48,6 +49,7 @@ return {
         })
 
         mason_dap.setup({
+            automatic_installation = true,
             ensure_installed = {
                 "node-debug2-adapter", -- Node.js/JS Debugger
                 "netcoredbg", -- .NET Debugger
@@ -57,6 +59,7 @@ return {
         })
 
         mason_tool_installer.setup({
+            automatic_installation = true,
             ensure_installed = {
                 "prettier", -- prettier formatter
                 "prettierd", -- prettier formatter

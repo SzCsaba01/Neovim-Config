@@ -52,15 +52,6 @@ return {
                 opts.desc = "Show buffer diagnostics"
                 vim.keymap.set("n", "<leader>D", "<cmd>Telescope diagnostics bufnr=0<CR>", opts)
 
-                opts.desc = "Show line diagnostics"
-                vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts) -- show diagnostics for line
-
-                opts.desc = "Go to previous diagnostic"
-                vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, opts) -- go to previous diagnostic
-
-                opts.desc = "Go to next diagnostic"
-                vim.keymap.set("n", "]d", vim.diagnostic.goto_next, opts) -- go to next diagnostic
-
                 opts.desc = "Show documentation for what is under cursor"
                 vim.keymap.set("n", "K", vim.lsp.buf.hover, opts) -- show documentation for what is under cursor
 
@@ -69,27 +60,26 @@ return {
             end,
         })
 
+        local signs = {
+            Error = "",
+            Warn = "",
+            Info = "",
+            Hint = "󰠠",
+        }
+
+        for type, icon in pairs(signs) do
+            local hl = "DiagnosticSign" .. type
+            vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = "" })
+        end
+
         vim.diagnostic.config({
-            signs = {
-                text = {
-                    [vim.diagnostic.severity.ERROR] = " ",
-                    [vim.diagnostic.severity.WARN] = " ",
-                    [vim.diagnostic.severity.INFO] = " ",
-                    [vim.diagnostic.severity.HINT] = "󰠠 ",
-                },
-                linehl = {
-                    [vim.diagnostic.severity.ERROR] = "Error",
-                    [vim.diagnostic.severity.WARN] = "Warn",
-                    [vim.diagnostic.severity.INFO] = "Info",
-                    [vim.diagnostic.severity.HINT] = "Hint",
-                },
-                texthl = {
-                    [vim.diagnostic.severity.ERROR] = "DiagnosticSignError",
-                    [vim.diagnostic.severity.WARN] = "DiagnosticSignWarn",
-                    [vim.diagnostic.severity.INFO] = "DiagnosticSignInfo",
-                    [vim.diagnostic.severity.HINT] = "DiagnosticSignHint",
-                },
-            },
+            virtual_text = true,
+            signs = true,     
+            underline = true,
+            update_in_insert = false,
+            severity_sort = true,
+            float = { border = "rounded" },
+            linehl = false,    
         })
     end,
 }

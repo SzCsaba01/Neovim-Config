@@ -10,6 +10,7 @@ return {
         local dap = require("dap")
         local dapui = require("dapui")
         local persistent_breakpoints = require("persistent-breakpoints")
+        local dotnet = require("easy-dotnet")
 
         dapui.setup()
 
@@ -60,192 +61,82 @@ return {
             }
         end
 
-        -- C#, .NET debugging 
+        -- -- C#, .NET debugging 
 
-        local cached_project_root = nil
-
-         -- Function to find the project directory with an entry point (Program.cs or Startup.cs)
-        local function find_project_with_entry_point()
-            if cached_project_root ~= nil then
-                return cached_project_root
-            end
-
-            local cwd = vim.fn.getcwd()
-            local sln_files = vim.fn.glob(cwd .. "/*.sln", false, true)
-
-            if vim.tbl_isempty(sln_files) then
-                vim.notify("No solution file found in the current directory", vim.log.levels.ERROR)
-                return nil
-            end
-
-            local sln_path = sln_files[1]
-            local sln_file = io.open(sln_path, "r")
-            if not sln_file then
-                vim.notify("Failed to open solution file", vim.log.levels.ERROR)
-                return nil
-            end
-
-            local project_paths = {}
-
-            for line in sln_file:lines() do
-                local path = line:match('Project%([^%)]+%)%s*=%s*"[^"]+",%s*"([^"]+%.csproj)"')
-                if path then
-                    local fixed_path = path:gsub("\\", "/")
-                    table.insert(project_paths, fixed_path)
+        -- easy-dotnet helper to rebuild project async
+        local function rebuild_project(co, path)
+            local spinner = require("easy-dotnet.ui-modules.spinner").new()
+            spinner:start_spinner("Building")
+            vim.fn.jobstart(string.format("dotnet build %s", path), {
+                on_exit = function(_, return_code)
+                if return_code == 0 then
+                    spinner:stop_spinner("Built successfully")
+                else
+                    spinner:stop_spinner("Build failed with exit code " .. return_code, vim.log.levels.ERROR)
+                    error("Build failed")
                 end
-            end
-
-            sln_file:close()
-
-
-            for _, rel_path in ipairs(project_paths) do
-                local abs_path = cwd .. "/" .. rel_path
-                local project_dir = vim.fn.fnamemodify(abs_path, ":h")
-                if vim.fn.filereadable(project_dir .. "/Program.cs") == 1 or vim.fn.filereadable(project_dir .. "/Startup.cs") == 1 then
-                    cached_project_root = project_dir
-                    return project_dir
-                end
-            end
-
-            return nil
-        end
-        
-        local function pick_profile()
-            local project_dir = find_project_with_entry_point()
-            if not project_dir then
-                error("No project directory found for profile selection")
-            end
-
-            local launch_settings_path = project_dir .. "/Properties/launchSettings.json"
-            local file = io.open(launch_settings_path, "r")
-            if not file then
-                error("Failed to open launchSettings.json")
-            end
-
-            local content = file:read("*a")
-            file:close()
-
-            content = content:gsub("^\239\187\191", "")  -- Remove UTF-8 BOM
-            local decoded = vim.fn.json_decode(content)
-            local profiles = decoded and decoded["profiles"]
-
-            if not profiles then
-                error("No profiles found in launchSettings.json", vim.log.levels.ERROR)
-            end
-
-            local profile_names = {}
-            for name, _ in pairs(profiles) do
-                table.insert(profile_names, name)
-            end
-
-            table.sort(profile_names)
-
-            local co = coroutine.running()
-            vim.ui.select(profile_names, {
-                prompt = "Select Profile:",
-            }, function(choice)
-                coroutine.resume(co, choice)
-            end)
-
-            local selected_profile = coroutine.yield()
-            if not selected_profile then
-                return nil
-            end
-
-            return selected_profile
-        end
-        
-        
-        -- Function to read launchSettings.json and pick the selected profile
-        local function read_launch_settings(profile)
-            local project_dir = find_project_with_entry_point()
-            if not project_dir then
-                vim.notify("No project directory found for reading launch settings", vim.log.levels.ERROR)
-                return nil
-            end
-
-            local launch_settings_path = project_dir .. "/Properties/launchSettings.json"
-            local file = io.open(launch_settings_path, "r")
-            if not file then
-                vim.notify("Failed to open launchSettings.json", vim.log.levels.ERROR)
-                return nil
-            end
-
-            local content = file:read("*a")
-            file:close()
-
-            content = content:gsub("^\239\187\191", "")  -- Remove UTF-8 BOM
-            local launch_settings = vim.fn.json_decode(content)
-            local profile_data = launch_settings["profiles"][profile]
-
-            if not profile_data then
-                vim.notify("Profile not found in launchSettings.json", vim.log.levels.WARN)
-                return nil
-            end
-
-            return profile_data
+                coroutine.resume(co)
+                end,
+            })
+            coroutine.yield()
         end
 
-        local function find_dll_path()
-            local project_dir = find_project_with_entry_point()
-            if project_dir == nil then
-                project_dir = vim.fn.getcwd()
-            end
-
-            local project_name = vim.fn.fnamemodify(project_dir, ":t")
-            local debug_dirs = vim.fn.globpath(project_dir .. "/bin/Debug", "net*/", 0, 1)
-            if vim.tbl_isempty(debug_dirs) then
-                vim.notify("No Debug directories found")
-                return nil
-            end
-
-            local dll_path = vim.fn.glob(debug_dirs[1] .. project_name .. ".dll")
-            vim.notify("DLL Path: " .. dll_path)
-            if dll_path == "" then
-                error("No .dll file found in the Debug folder")
-                return nil
-            end
-            
-            return dll_path
+        local function file_exists(path)
+            local stat = vim.loop.fs_stat(path)
+            return stat and stat.type == "file"
         end
 
-        local function find_env_variables()
-            local profile = pick_profile()
-            if not profile then
-                error("No profile selected")
-            end
-            vim.notify("Selected Profile: " .. profile)
+        local debug_dll = nil
 
-            local profile_data = read_launch_settings(profile)
-            if not profile_data then
-                return {}
+        local function ensure_dll()
+            if debug_dll then
+                return debug_dll
             end
-            
-            local env_vars = profile_data["environmentVariables"] or {}
-            env_vars["ASPNETCORE_ENVIRONMENT"] = env_vars["ASPNETCORE_ENVIRONMENT"] or "Development"
-            env_vars["ASPNETCORE_URLS"] = profile_data["applicationUrl"]
-            
-            return env_vars
+            local dll = dotnet.get_debug_dll()
+            debug_dll = dll
+            return dll
         end
 
-        -- DAP Adapter for coreclr
+
+        -- -- DAP Adapter for coreclr
         dap.adapters.coreclr = {
             type = "executable",
             command = vim.fn.stdpath("data") .. "/mason/packages/netcoredbg/netcoredbg/netcoredbg",
             args = { "--interpreter=vscode" },
         }
         
-        -- DAP Configurations for .NET
-        dap.configurations.cs = {
-            {
-                type = "coreclr",
-                request = "launch",
-                name = "Launch .NET",
-                program = find_dll_path,
-                env = find_env_variables,
-                stopAtEntry = true,
-            },
-        }        
+        for _, lang in ipairs { "cs", "fsharp" } do
+            dap.configurations[lang] = {
+                {
+                    type = "coreclr",
+                    name = "Program",
+                    request = "launch",
+                    env = function()
+                        local dll = ensure_dll()
+                        local vars = dotnet.get_environment_variables(dll.project_name, dll.absolute_project_path, false)
+                        return vars or nil
+                    end,
+                    program = function()
+                        local dll = ensure_dll()
+                        local co = coroutine.running()
+                        rebuild_project(co, dll.project_path)
+                        if not file_exists(dll.target_path) then
+                            error("Project has not been built, path: " .. dll.target_path)
+                        end
+                        return dll.target_path
+                    end,
+                    cwd = function()
+                        local dll = ensure_dll()
+                        return dll.absolute_project_path
+                    end,
+                },
+            }
+        end
+
+        -- Clear debug_dll on termination
+        dap.listeners.before["event_terminated"]["easy-dotnet"] = function()
+            debug_dll = nil
+        end
 
         -- C/C++ Adapter using cpptools from Mason
         -- require("dap").adapters.codelldb = {
@@ -274,35 +165,34 @@ return {
         -- dap.configurations.c = dap.configurations.cpp
 
         -- Keybindings
-        vim.keymap.set("n", "<leader>b", function()
-            require("persistent-breakpoints.api").toggle_breakpoint()
-        end, { desc = "Toggle Breakpoint" })
-        vim.keymap.set("n", "<leader>dc", dap.run_to_cursor, { desc = "Run to cursor" })
+        vim.keymap.set("n", "<F1>", dap.continue, {})
+        vim.keymap.set("n", "<F2>", dap.step_over, {})
+        vim.keymap.set("n", "<F3>", dap.step_into, {})
+        vim.keymap.set("n", "<F5>", dap.run_to_cursor, {})
+        vim.keymap.set("n", "<F4>", dap.step_out, {})
+        vim.keymap.set("n", "<leader>b", dap.toggle_breakpoint, {})
+        vim.keymap.set("n", "<leader>dr", dap.repl.toggle, {})
         vim.keymap.set("n", "<leader>dd", function()
-            dap.terminate()
+            dap.close()
             dapui.close()
-            dap.disconnect()
-        end, { desc = "Close Debug Session" })
-
-        vim.keymap.set("n", "<F1>", dap.continue, { desc = "Continue" })
-        vim.keymap.set("n", "<F2>", dap.step_over, { desc = "Step over" })
-        vim.keymap.set("n", "<F3>", dap.step_into, { desc = "Step into" })
-        vim.keymap.set("n", "<F4>", dap.step_out, { desc = "Step out" })
-        vim.keymap.set("n", "<F5>", dap.step_back, { desc = "Step back" })
-        vim.keymap.set("n", "<F10>", dap.restart, { desc = "Restart" })
+        end, {})
 
         vim.keymap.set("n", "<space>?", function()
-            require("dapui").eval(nil, { enter = true })
+            dapui.eval(nil, { enter = true })
         end)
 
-        dap.listeners.after.launch.dapui_config = function()
-            dapui.open()
+        -- dapui listeners
+        dap.listeners.before.attach.dapui_config = function()
+        dapui.open()
         end
-        dap.listeners.after.event_terminated.dapui_config = function()
-            dapui.close()
+        dap.listeners.before.launch.dapui_config = function()
+        dapui.open()
         end
-        dap.listeners.after.event_exited.dapui_config = function()
-            dapui.close()
+        dap.listeners.before.event_terminated.dapui_config = function()
+        dapui.close()
+        end
+        dap.listeners.before.event_exited.dapui_config = function()
+        dapui.close()
         end
     end,
 }

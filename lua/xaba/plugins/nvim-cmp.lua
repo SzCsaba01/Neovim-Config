@@ -8,6 +8,7 @@ return {
         "saadparwaiz1/cmp_luasnip", -- For snippet autocompletion
         "rafamadriz/friendly-snippets", -- Useful snippets
         "onsails/lspkind.nvim", -- VS-code like pictograms
+        "GustavEikaas/easy-dotnet.nvim",
     },
     config = function()
         local cmp = require("cmp")
@@ -16,6 +17,7 @@ return {
 
         -- Load vscode-style snippets from installed plugins (e.g., friendly-snippets)
         require("luasnip.loaders.from_vscode").lazy_load()
+        cmp.register_source("easy-dotnet", require("easy-dotnet").package_completion_source)
 
         cmp.setup({
             completion = {
@@ -42,6 +44,7 @@ return {
                 { name = "luasnip" },
                 { name = "buffer" },
                 { name = "path" },
+                { name = 'easy-dotnet' },
             }),
             formatting = {
                 format = lspkind.cmp_format({

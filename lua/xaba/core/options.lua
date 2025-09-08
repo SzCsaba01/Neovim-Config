@@ -8,11 +8,22 @@ opt.number = true
 opt.shada = ""
 
 -- tabs & indentation
-opt.tabstop = 4 -- 4 spaces for tabs (prettier default)
-opt.shiftwidth = 4 -- 4 spaces for indent width
-opt.softtabstop = 4
+opt.tabstop = 2 -- 2 spaces for tabs (prettier default)
+opt.shiftwidth = 2 -- 2 spaces for indent width
+opt.softtabstop = 2
 opt.expandtab = true -- expand tab to spaces
 opt.autoindent = true -- copy indent from current line when starting new one
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "cs",
+  callback = function()
+    vim.opt_local.tabstop = 4
+    vim.opt_local.shiftwidth = 4
+    vim.opt_local.softtabstop = 4
+    vim.opt_local.expandtab = false -- use tabs for C# files
+    vim.opt_local.autoindent = false -- don't copy indent from current line for C# files
+  end,
+})
 
 opt.wrap = true
 

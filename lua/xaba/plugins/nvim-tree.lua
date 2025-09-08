@@ -3,6 +3,7 @@ return {
     dependencies = "nvim-tree/nvim-web-devicons",
     config = function()
         local nvimtree = require("nvim-tree")
+        local api = require("nvim-tree.api")
         -- recommended settings from nvim-tree documentation
         vim.g.loaded_netrw = 1
         vim.g.loaded_netrwPlugin = 1
@@ -53,6 +54,16 @@ return {
         ) -- toggle file explorer on current file
         keymap.set("n", "<leader>ec", "<cmd>NvimTreeCollapse<CR>", { desc = "Collapse file explorer" }) -- collapse file explorer
         keymap.set("n", "<leader>er", "<cmd>NvimTreeRefresh<CR>", { desc = "Refresh file explorer" }) -- refresh file explorer
+
+        local function opts(desc)
+          return { desc = 'nvim-tree: ' .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+        end
+
+        keymap.set('n', 'A', function()
+          local node = api.tree.get_node_under_cursor()
+          local path = node.type == "directory" and node.absolute_path or vim.fs.dirname(node.absolute_path)
+          require("easy-dotnet").create_new_item(path)
+        end, opts('Create file from dotnet template'))
 
         vim.cmd([[
       " Background and foreground for NvimTree window (make background transparent)
