@@ -43,8 +43,8 @@ return {
                 "dockerls",
                 "jsonls",
                 -- "clangd",
-                --"gradle_ls",
-                "jdtls",
+                -- "gradle_ls",
+                -- "jdtls",
             },
         })
 

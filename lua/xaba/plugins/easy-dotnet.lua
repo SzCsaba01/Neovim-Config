@@ -1,6 +1,7 @@
 -- lazy.nvim
 return {
   "GustavEikaas/easy-dotnet.nvim",
+  commit = "cf58e4a4080fbfe2d93396938bbb0b3d1cc369c7",
   -- 'nvim-telescope/telescope.nvim' or 'ibhagwan/fzf-lua' or 'folke/snacks.nvim'
   -- are highly recommended for a better experience
   dependencies = { "nvim-lua/plenary.nvim", 'nvim-telescope/telescope.nvim', },

@@ -10,7 +10,9 @@ return {
     },
     config = function()
         local lspconfig = require("lspconfig")
+        local util = require("lspconfig.util")
         local cmp_nvim_lsp = require("cmp_nvim_lsp")
+        local omnisharp_path = vim.fn.stdpath("data") .. "/mason/bin/omnisharp"
 
         local capabilities = cmp_nvim_lsp.default_capabilities()
 
@@ -58,6 +60,25 @@ return {
                 opts.desc = "Restart LSP"
                 vim.keymap.set("n", "<leader>rs", ":LspRestart<CR>", opts) -- mapping to restart lsp if necessary
             end,
+        })
+
+        lspconfig.omnisharp.setup({
+            cmd = { omnisharp_path, "--languageserver", "--hostPID", tostring(vim.fn.getpid()) },
+
+            root_dir = function(fname)
+                local root = util.search_ancestors(fname, function(dir)
+                    if vim.fn.globpath(dir, "*.sln") ~= "" then
+                        return dir
+                    end
+                    if vim.fn.globpath(dir, "*.csproj") ~= "" then
+                        return dir
+                    end
+                    return nil
+                end)
+                return root or util.find_git_ancestor(fname) or vim.loop.cwd()
+            end,
+
+            capabilities = capabilities,
         })
 
         local signs = {

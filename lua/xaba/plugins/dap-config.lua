@@ -4,36 +4,27 @@ return {
     dependencies = {
         "rcarriga/nvim-dap-ui",
         "nvim-neotest/nvim-nio",
-        "Weissle/persistent-breakpoints.nvim",
     },
     config = function()
         local dap = require("dap")
         local dapui = require("dapui")
-        local persistent_breakpoints = require("persistent-breakpoints")
         local dotnet = require("easy-dotnet")
 
         dapui.setup()
 
-        persistent_breakpoints.setup({
-            save_dir = vim.fn.stdpath("data") .. "/nvim_checkpoints/",
-            load_breakpoints_on_start = true,
-            save_breakpoints_on_exit = true,
-            load_breakpoints_event = { "BufReadPost" },
-        })
-
         -- Define DAP configurations for Java
-        dap.configurations.java = {
-            {
-                type = "java",
-                request = "launch",
-                name = "Launch Java Program",
-                mainClass = function()
-                    return vim.fn.input("Main Class: ", vim.fn.expand("%:p"), "file")
-                end,
-                cwd = "${workspaceFolder}",
-                stopAtEntry = true,
-            },
-        }
+        -- dap.configurations.java = {
+        --     {
+        --         type = "java",
+        --         request = "launch",
+        --         name = "Launch Java Program",
+        --         mainClass = function()
+        --             return vim.fn.input("Main Cla fss: ", vim.fn.expand("%:p"), "file")
+        --         end,
+        --         cwd = "${workspaceFolder}",
+        --         stopAtEntry = true,
+        --     },
+        -- }
 
         -- JavaScript and TypeScript Adapter using node-debug2-adapter from Mason
         dap.adapters.node2 = {
@@ -63,7 +54,7 @@ return {
 
         -- -- C#, .NET debugging 
 
-        -- easy-dotnet helper to rebuild project async
+        --easy-dotnet helper to rebuild project async
         local function rebuild_project(co, path)
             local spinner = require("easy-dotnet.ui-modules.spinner").new()
             spinner:start_spinner("Building")
@@ -81,22 +72,16 @@ return {
             coroutine.yield()
         end
 
-        local function file_exists(path)
-            local stat = vim.loop.fs_stat(path)
-            return stat and stat.type == "file"
-        end
-
         local debug_dll = nil
 
         local function ensure_dll()
-            if debug_dll then
+            if debug_dll ~= nil then
                 return debug_dll
             end
-            local dll = dotnet.get_debug_dll()
+            local dll = dotnet.get_debug_dll(true)
             debug_dll = dll
             return dll
         end
-
 
         -- -- DAP Adapter for coreclr
         dap.adapters.coreclr = {
@@ -113,27 +98,24 @@ return {
                     request = "launch",
                     env = function()
                         local dll = ensure_dll()
-                        local vars = dotnet.get_environment_variables(dll.project_name, dll.absolute_project_path, false)
+                        local vars = dotnet.get_environment_variables(dll.project_name, dll.relative_project_path, false)
                         return vars or nil
                     end,
                     program = function()
                         local dll = ensure_dll()
                         local co = coroutine.running()
                         rebuild_project(co, dll.project_path)
-                        if not file_exists(dll.target_path) then
-                            error("Project has not been built, path: " .. dll.target_path)
-                        end
-                        return dll.target_path
+                        return dll.relative_dll_path
                     end,
                     cwd = function()
                         local dll = ensure_dll()
-                        return dll.absolute_project_path
+                        return dll.relative_project_path
                     end,
                 },
             }
         end
 
-        -- Clear debug_dll on termination
+        --Clear debug_dll on termination
         dap.listeners.before["event_terminated"]["easy-dotnet"] = function()
             debug_dll = nil
         end

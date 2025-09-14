@@ -7,23 +7,16 @@ return {
 
         -- Configure project.nvim
         project.setup({
-            detection_methods = { "pattern", "lsp", "manual" },
+            detection_methods = { "pattern", "lsp", "manual"},
             patterns = {
                 "package.json", -- Node.js and React projects
                 "angular.json", -- Angular projects
                 "tsconfig.json", -- TypeScript config (for Angular, React, Node.js)
                 "webpack.config.js", -- React/Node.js projects with Webpack
-                "Cargo.toml", -- Rust projects (optional)
-                "App_Start", -- .NET projects (older ASP.NET)
-                "web.config", -- .NET projects (ASP.NET and WebForms)
-                "project.json", -- Older .NET Core projects (pre .csproj format)
+                ".git", -- Git repository root
                 "*.sln", -- .NET solution files
-                "pom.xml", -- Maven for Java projects
-                "build.gradle.kts", -- Gradle for Java projects
-                "settings.gradle.kts", -- Gradle settings for Java projects
-                "gradlew", 
             },
-            scope_chdir = "global", -- Automatically change the working directory to project root
+            manual_mode = true,
         })
 
         -- Load Telescope's project.nvim extension
