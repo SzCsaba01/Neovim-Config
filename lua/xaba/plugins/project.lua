@@ -24,6 +24,9 @@ return {
 
         -- Keymap for opening the project picker with Telescope
         vim.api.nvim_set_keymap("n", "<leader>pp", "<cmd>Telescope projects<CR>", { noremap = true, silent = true })
+        vim.api.nvim_set_keymap("n","<leader>pa",":ProjectRootAdd<CR>", { noremap = true, silent = true, desc = "Add current folder as project" }
+)
+
     end,
 }
 

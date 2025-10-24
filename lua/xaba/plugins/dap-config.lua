@@ -52,9 +52,9 @@ return {
             }
         end
 
-        -- -- C#, .NET debugging 
+        -- C#, .NET debugging 
 
-        --easy-dotnet helper to rebuild project async
+        -- easy-dotnet helper to rebuild project async
         local function rebuild_project(co, path)
             local spinner = require("easy-dotnet.ui-modules.spinner").new()
             spinner:start_spinner("Building")
@@ -83,7 +83,7 @@ return {
             return dll
         end
 
-        -- -- DAP Adapter for coreclr
+        -- DAP Adapter for coreclr
         dap.adapters.coreclr = {
             type = "executable",
             command = vim.fn.stdpath("data") .. "/mason/packages/netcoredbg/netcoredbg/netcoredbg",
@@ -115,7 +115,7 @@ return {
             }
         end
 
-        --Clear debug_dll on termination
+        -- --Clear debug_dll on termination
         dap.listeners.before["event_terminated"]["easy-dotnet"] = function()
             debug_dll = nil
         end

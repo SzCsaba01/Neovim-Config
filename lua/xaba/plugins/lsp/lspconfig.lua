@@ -9,14 +9,11 @@ return {
         { "b0o/schemastore.nvim", event = "BufReadPre" },
     },
     config = function()
-        local lspconfig = require("lspconfig")
         local util = require("lspconfig.util")
         local cmp_nvim_lsp = require("cmp_nvim_lsp")
         local omnisharp_path = vim.fn.stdpath("data") .. "/mason/bin/omnisharp"
 
         local capabilities = cmp_nvim_lsp.default_capabilities()
-
-        local keymap = vim.keymap 
 
         vim.api.nvim_create_autocmd("LspAttach", {
             group = vim.api.nvim_create_augroup("UserLspConfig", {}),
@@ -62,23 +59,31 @@ return {
             end,
         })
 
-        lspconfig.omnisharp.setup({
-            cmd = { omnisharp_path, "--languageserver", "--hostPID", tostring(vim.fn.getpid()) },
+        vim.api.nvim_create_autocmd("FileType", {
+            pattern = { "cs" },
+            callback = function()
+                local bufnr = args.buf
+                local fname = vim.api.nvim_buf_get_name(bufnr)
+                local root_dir = required("lspconfig.util").root_pattern("*.sln", "*.csproj")(fname)
+                  or required("lspconfig.util").find_git_ancestor(fname)
+                  or vim.fn.getcwd()
+                
+                if vim.lsp.get_active_clients({ bufnr = bufnr })[1] ~= nil then
+                    return
+                end
 
-            root_dir = function(fname)
-                local root = util.search_ancestors(fname, function(dir)
-                    if vim.fn.globpath(dir, "*.sln") ~= "" then
-                        return dir
-                    end
-                    if vim.fn.globpath(dir, "*.csproj") ~= "" then
-                        return dir
-                    end
-                    return nil
-                end)
-                return root or util.find_git_ancestor(fname) or vim.loop.cwd()
+                vim.lsp.start({
+                    name = "omnisharp",
+                    cmd = {
+                        vim.fn.stdpath("data") .. "/mason/bin/omnisharp",
+                        "--languageserver",
+                        "--hostPID",
+                        tostring(vim.fn.getpid()),
+                    },
+                    root_dir = root_dir,
+                    capabilities = required("cmp_nvim_lsp").default_capabilities(),
+                })
             end,
-
-            capabilities = capabilities,
         })
 
         local signs = {

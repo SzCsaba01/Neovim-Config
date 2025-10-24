@@ -42,6 +42,7 @@ return {
                 "docker_compose_language_service",
                 "dockerls",
                 "jsonls",
+                "yamlls",
                 -- "clangd",
                 -- "gradle_ls",
                 -- "jdtls",
@@ -51,10 +52,10 @@ return {
         mason_dap.setup({
             automatic_installation = true,
             ensure_installed = {
-                "node-debug2-adapter", -- Node.js/JS Debugger
+                --"node-debug2-adapter", -- Node.js/JS Debugger
                 "netcoredbg", -- .NET Debugger
-                "java-debug-adapter",  -- Java Debugger
-                "java-test",    -- Java Test Runner
+                --"java-debug-adapter",  -- Java Debugger
+                --"java-test",    -- Java Test Runner
             },
         })
 

@@ -51,3 +51,20 @@ opt.splitbelow = true -- split horizontal window to the bottom
 
 -- turn off swapfile
 opt.swapfile = false
+
+
+local undodir = vim.fn.stdpath("data") .. "/undo"
+
+-- Create undo directory if missing
+if vim.fn.isdirectory(undodir) == 0 then
+  vim.fn.mkdir(undodir, "p")
+end
+
+-- Enable safe persistent undo
+vim.opt.undofile = true
+vim.opt.undodir = undodir
+
+-- Disable backup/swap conflicts
+vim.opt.swapfile = false
+vim.opt.backup = false
+vim.opt.writebackup = false
