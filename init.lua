@@ -1,2 +1,1 @@
-require("xaba.core")
-require("xaba.lazy")
+require("config")
