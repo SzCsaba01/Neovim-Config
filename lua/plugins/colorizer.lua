@@ -1,12 +1,11 @@
 return {
-    "norcalli/nvim-colorizer.lua",
-    config = function()
-        require("colorizer").setup({
-            "*",
-            css = { rgb_fn = true },
-            sass = { rgb_fn = true },
-            html = { names = false },
-        })
-    end,
+  "norcalli/nvim-colorizer.lua",
+  config = function()
+    require("colorizer").setup({
+      "*",
+      css = { rgb_fn = true },
+      sass = { rgb_fn = true },
+      html = { names = false },
+    })
+  end,
 }
-

@@ -1,4 +1,4 @@
-return{
+return {
   "folke/lazydev.nvim",
   ft = "lua",
   cmd = "LazyDev",
@@ -11,3 +11,4 @@ return{
     },
   },
 }
+

@@ -1,77 +1,72 @@
 return {
-    "nvim-tree/nvim-tree.lua",
-    dependencies = "nvim-tree/nvim-web-devicons",
-    config = function()
-        local nvimtree = require("nvim-tree")
-        local api = require("nvim-tree.api")
-        -- recommended settings from nvim-tree documentation
-        vim.g.loaded_netrw = 1
-        vim.g.loaded_netrwPlugin = 1
+  "nvim-tree/nvim-tree.lua",
+  dependencies = "nvim-tree/nvim-web-devicons",
+  config = function()
+    local nvimtree = require("nvim-tree")
+    local api = require("nvim-tree.api")
+    -- recommended settings from nvim-tree documentation
+    vim.g.loaded_netrw = 1
+    vim.g.loaded_netrwPlugin = 1
 
-        nvimtree.setup({
-            view = {
-                width = 35,
-                relativenumber = true,
+    nvimtree.setup({
+      view = {
+        width = 35,
+        relativenumber = true,
+      },
+      sync_root_with_cwd = true,
+      respect_buf_cwd = true,
+      update_focused_file = {
+        enable = true,
+        update_root = true,
+      },
+      -- change folder arrow icons
+      renderer = {
+        indent_markers = {
+          enable = true,
+        },
+        icons = {
+          glyphs = {
+            folder = {
+              arrow_closed = "",
+              arrow_open = "",
             },
-            sync_root_with_cwd = true,
-            respect_buf_cwd = true,
-            update_focused_file = {
-                enable = true,
-                update_root = true
-            },
-            -- change folder arrow icons
-            renderer = {
-                indent_markers = {
-                    enable = true,
-                },
-                icons = {
-                    glyphs = {
-                        folder = {
-                            arrow_closed = "",
-                            arrow_open = "",
-                        },
-                    },
-                },
-            },
+          },
+        },
+      },
 
-            actions = {
-                open_file = {
-                    window_picker = {
-                        enable = false,
-                    },
-                },
-            },
-            filters = {
-                custom = { ".DS_Store" },
-            },
-            git = {
-                ignore = false,
-            },
-        })
+      actions = {
+        open_file = {
+          window_picker = {
+            enable = false,
+          },
+        },
+      },
+      filters = {
+        custom = { ".DS_Store" },
+      },
+      git = {
+        ignore = false,
+      },
+    })
 
-        local keymap = vim.keymap
+    local keymap = vim.keymap
 
-        keymap.set("n", "<leader>ee", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" }) -- toggle file explorer
-        keymap.set(
-            "n",
-            "<leader>ef",
-            "<cmd>NvimTreeFindFileToggle<CR>",
-            { desc = "Toggle file explorer on current file" }
-        ) -- toggle file explorer on current file
-        keymap.set("n", "<leader>ec", "<cmd>NvimTreeCollapse<CR>", { desc = "Collapse file explorer" }) -- collapse file explorer
-        keymap.set("n", "<leader>er", "<cmd>NvimTreeRefresh<CR>", { desc = "Refresh file explorer" }) -- refresh file explorer
+    keymap.set("n", "<leader>ee", "<cmd>NvimTreeToggle<CR>", { desc = "Toggle file explorer" }) -- toggle file explorer
+    keymap.set("n", "<leader>ef", "<cmd>NvimTreeFindFileToggle<CR>", { desc = "Toggle file explorer on current file" }) -- toggle file explorer on current file
+    keymap.set("n", "<leader>ec", "<cmd>NvimTreeCollapse<CR>", { desc = "Collapse file explorer" }) -- collapse file explorer
+    keymap.set("n", "<leader>er", "<cmd>NvimTreeRefresh<CR>", { desc = "Refresh file explorer" }) -- refresh file explorer
 
-        local function opts(desc)
-          return { desc = 'nvim-tree: ' .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
-        end
+    local function opts(desc)
+      return { desc = "nvim-tree: " .. desc, buffer = bufnr, noremap = true, silent = true, nowait = true }
+    end
 
-        keymap.set('n', 'A', function()
-          local node = api.tree.get_node_under_cursor()
-          local path = node.type == "directory" and node.absolute_path or vim.fs.dirname(node.absolute_path)
-          require("easy-dotnet").create_new_item(path)
-        end, opts('Create file from dotnet template'))
+    keymap.set("n", "A", function()
+      local node = api.tree.get_node_under_cursor()
+      local path = node.type == "directory" and node.absolute_path or vim.fs.dirname(node.absolute_path)
+      require("easy-dotnet").create_new_item(path)
+    end, opts("Create file from dotnet template"))
 
-        vim.cmd([[
+    vim.cmd([[
       " Background and foreground for NvimTree window (make background transparent)
       hi NvimTreeNormal guibg=NONE guifg=#a1a1a1
       hi NvimTreeNormalNC guibg=NONE guifg=#a1a1a1  " This ensures transparency when NvimTree is not focused
@@ -96,5 +91,5 @@ return {
       " Deleted files, orange
       hi NvimTreeGitDeleted guifg=#ff4500
     ]])
-    end,
+  end,
 }
