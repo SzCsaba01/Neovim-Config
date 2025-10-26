@@ -61,13 +61,6 @@ return {
           cmd = omnisharp_cmd,
           root_dir = root_dir,
           capabilities = cmp_nvim_lsp.default_capabilities(),
-          settings = {
-            omnisharp = {
-              useModernNet = true, -- Use .NET SDK instead of Mono
-              useGlobalMono = "never", -- Never use global Mono
-              enableImportCompletion = true, -- Optional: auto add using suggestions
-            },
-          },
         })
       end,
     })
