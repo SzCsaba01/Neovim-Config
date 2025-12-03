@@ -36,34 +36,34 @@ return {
       end,
     })
 
-    local omnisharp_cmd = {
-      vim.fn.stdpath("data") .. "/mason/bin/OmniSharp",
-      "--languageserver",
-      "--hostPID",
-      tostring(vim.fn.getpid()),
-    }
-
-    vim.api.nvim_create_autocmd("FileType", {
-      pattern = "cs",
-      callback = function(args)
-        local bufnr = args.buf
-        for _, client in pairs(vim.lsp.get_clients({ bufnr = bufnr })) do
-          if client.name == "omnisharp" then
-            return
-          end
-        end
-
-        local root_dir = lspconfig_util.root_pattern("*.sln", "*.csproj")(vim.api.nvim_buf_get_name(bufnr))
-          or vim.fn.getcwd()
-
-        vim.lsp.start({
-          name = "omnisharp",
-          cmd = omnisharp_cmd,
-          root_dir = root_dir,
-          capabilities = cmp_nvim_lsp.default_capabilities(),
-        })
-      end,
-    })
+    -- local omnisharp_cmd = {
+    --   vim.fn.stdpath("data") .. "/mason/bin/OmniSharp",
+    --   "--languageserver",
+    --   "--hostPID",
+    --   tostring(vim.fn.getpid()),
+    -- }
+    --
+    -- vim.api.nvim_create_autocmd("FileType", {
+    --   pattern = "cs",
+    --   callback = function(args)
+    --     local bufnr = args.buf
+    --     for _, client in pairs(vim.lsp.get_clients({ bufnr = bufnr })) do
+    --       if client.name == "omnisharp" then
+    --         return
+    --       end
+    --     end
+    --
+    --     local root_dir = lspconfig_util.root_pattern("*.sln", "*.csproj")(vim.api.nvim_buf_get_name(bufnr))
+    --       or vim.fn.getcwd()
+    --
+    --     vim.lsp.start({
+    --       name = "omnisharp",
+    --       cmd = omnisharp_cmd,
+    --       root_dir = root_dir,
+    --       capabilities = cmp_nvim_lsp.default_capabilities(),
+    --     })
+    --   end,
+    -- })
 
     -- Diagnostics configuration
     local severity = vim.diagnostic.severity
