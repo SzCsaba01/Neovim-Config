@@ -31,7 +31,7 @@ return {
       automatic_installation = true,
       ensure_installed = {
         -- "angularls",
-        -- "omnisharp",
+        "omnisharp",
         "ts_ls",
         "html",
         "cssls",
