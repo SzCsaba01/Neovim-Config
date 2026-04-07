@@ -105,7 +105,6 @@ return {
     vim.keymap.set("n", "<F5>", dap.run_to_cursor, {})
     vim.keymap.set("n", "<F4>", dap.step_out, {})
     vim.keymap.set("n", "<leader>b", dap.toggle_breakpoint, {})
-    vim.keymap.set("n", "<leader>dr", dap.repl.toggle, {})
     vim.keymap.set("n", "<leader>dd", function()
       dap.close()
       dapui.close()

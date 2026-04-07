@@ -1,39 +1,44 @@
 return {
-  "folke/tokyonight.nvim",
+  "ellisonleao/gruvbox.nvim",
   priority = 1000,
   config = function()
-    require("tokyonight").setup({
-      style = "moon",
-      transparent = true,
-      styles = {
-        sidebars = "dark",
-        floats = "dark",
+    -- FORCE dark mode
+    vim.o.background = "dark"
+
+    require("gruvbox").setup({
+      contrast = "hard",
+      transparent_mode = true,
+
+      italic = {
+        comments = true,
       },
-      hide_inactive_statusline = true,
 
-      on_colors = function(colors)
-        colors.bg = "#13151a"
-        colors.fg = "#a1a1a1"
-        colors.comment = "#5f5f5f"
-        colors.border = "#2d2f36"
-        colors.gutter_fg = "#22262f"
+      overrides = {
+        -- Core
+        Normal = { bg = "none" },
+        NormalFloat = { bg = "none" },
+        CursorLine = { bg = "#1d2021" },
+        LineNr = { fg = "#665c54" },
+        Comment = { fg = "#928374", italic = true },
 
-        colors.statusline_bg = "#22272e"
-        colors.tabline_bg = "#1f2328"
-      end,
+        -- Floating UI
+        FloatBorder = { fg = "#504945" },
 
-      on_highlights = function(hl, colors)
-        hl.Normal = { bg = "none", fg = colors.fg }
-        hl.Comment = { fg = colors.comment, italic = true }
-        hl.CursorLine = { bg = "#1e2228" }
-        hl.LineNr = { fg = colors.gutter_fg }
-        hl.StatusLine = { bg = colors.statusline_bg, fg = colors.fg }
-        hl.TabLine = { bg = colors.tabline_bg, fg = colors.fg }
-        hl.TabLineSel = { bg = colors.bg, fg = colors.fg, bold = true }
-        hl.FloatBorder = { fg = colors.border }
-      end,
+        -- SQL
+        ["@keyword.sql"] = { fg = "#fb4934", bold = true },
+        ["@type.sql"] = { fg = "#83a598" },
+        ["@function.sql"] = { fg = "#8ec07c" },
+        ["@string.sql"] = { fg = "#b8bb26" },
+        ["@number.sql"] = { fg = "#fe8019" },
+
+        sqlKeyword = { fg = "#fb4934", bold = true },
+        sqlType = { fg = "#83a598" },
+        sqlFunction = { fg = "#8ec07c" },
+        sqlString = { fg = "#b8bb26" },
+        sqlNumber = { fg = "#fe8019" },
+      },
     })
 
-    vim.cmd("colorscheme tokyonight")
+    vim.cmd("colorscheme gruvbox")
   end,
 }

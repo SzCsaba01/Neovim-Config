@@ -11,12 +11,11 @@ return {
       typescript = { "eslint_d", "eslint" },
       javascriptreact = { "eslint_d", "eslint" },
       typescriptreact = { "eslint_d", "eslint" },
-      -- svelte = { "eslint_d", "eslint" },
-      -- python = { "pylint" },
       -- angular = { "eslint_d", "eslint" },
       css = { "stylelint" },
       scss = { "stylelint" },
       less = { "stylelint" },
+      sql = { "sqlfluff" },
     }
 
     -- Function to check if the project has an ESLint config file

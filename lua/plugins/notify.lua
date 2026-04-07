@@ -5,6 +5,10 @@ return {
     vim.notify = require("notify")
 
     require("notify").setup({
+      background_colour = "#1d2021", -- REQUIRED when bg = none
+      fps = 60,
+      render = "minimal",
+      stages = "fade",
       timeout = 3000,
     })
 

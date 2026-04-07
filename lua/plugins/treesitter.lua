@@ -1,6 +1,7 @@
 return {
   "nvim-treesitter/nvim-treesitter",
   event = { "BufReadPre", "BufNewFile" },
+  branch = "master",
   build = ":TSUpdate",
   dependencies = {
     "windwp/nvim-ts-autotag",
@@ -11,9 +12,13 @@ return {
     treesitter.setup({
       highlight = {
         enable = true,
+        additional_vim_regex_highlighting = { "sql" },
       },
 
-      indent = { enable = true },
+      indent = {
+        enable = true,
+        disable = { "sql" },
+      },
 
       autotag = {
         enable = true,
@@ -36,6 +41,7 @@ return {
         "vimdoc",
         "angular",
         "xml",
+        "sql",
       },
       sync_install = true,
       auto_install = true,
