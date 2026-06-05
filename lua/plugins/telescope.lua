@@ -42,7 +42,6 @@ return {
           "target",
         },
         hidden = false,
-        winblend = 10,
         preview = { treesitter = false },
         dynamic_preview_title = true,
         mappings = {

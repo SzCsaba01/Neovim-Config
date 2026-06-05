@@ -10,11 +10,8 @@ return {
 
     dotnet.setup({
       debugger = {
-        bin_path = vim.fn.stdpath("data") .. "/mason/packages/netcoredbg/netcoredbg/netcoredbg",
+        bin_path = vim.fn.stdpath("data") .. "/mason/bin/netcoredbg",
         auto_register_dap = true,
-        mappings = {
-          open_variable_viewer = { lhs = "T", desc = "open variable viewer" },
-        },
       },
       ---@type TestRunnerOptions
       test_runner = {

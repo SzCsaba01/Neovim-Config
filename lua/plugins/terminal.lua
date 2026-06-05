@@ -10,7 +10,6 @@ return {
         direction = "float",
         float_opts = {
           border = "curved",
-          winblend = 10,
         },
 
         auto_scroll = true,
