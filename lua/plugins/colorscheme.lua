@@ -10,6 +10,14 @@ return {
 
       overrides = {
 
+        ["@lsp.type.class"] = { fg = "#fabd2f" }, -- yellow
+        ["@lsp.type.interface"] = { fg = "#b8bb26", italic = true },
+        ["@lsp.type.namespace"] = { fg = "#83a598", bold = true }, -- blue
+        ["@lsp.type.method"] = { fg = "#8ec07c" }, -- aqua
+        ["@lsp.type.property"] = { fg = "#83a598" }, -- blue
+        ["@lsp.type.field"] = { fg = "#83a598" }, -- blue
+        ["@lsp.type.parameter"] = { fg = "#d3869b" }, -- yellow
+
         -- SQL (treesitter + legacy)
         -- ["@keyword.sql"] = { fg = "#fb4934", bold = true },
         -- ["@type.sql"] = { fg = "#83a598" },
